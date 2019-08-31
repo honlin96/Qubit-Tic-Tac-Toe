@@ -195,7 +195,7 @@ def isvalidmove(move,register0,register1):
                 return False
         else: 
             #if CNOT gate, check both registers
-            if status[register0] and status[register1] == 1:
+            if status[register0] and status[register1] == 1 and register0 != register1:
                 return True
             else:
                 print('Invalid move: One of the register is empty/has been measured')
