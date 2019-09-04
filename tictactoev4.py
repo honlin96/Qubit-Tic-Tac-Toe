@@ -187,13 +187,22 @@ def updatestate(player,register0,register1,playermove,qubit):
 
 def measurement_result(qubit,register0):
     #return the measurement result after the collapse of state.
-    classical = qubit[register0-1]
-    if classical == Qubit('0')[0]:
-        classicalbit = '0'
-        print('The qubit collapses to classical state 0')
-    elif classical == Qubit('1')[0]:
-        classicalbit = '1'
-        print('The qubit collapses to classical state 1')
+    if type(qubit) == Add:
+        partial = measure_partial_oneshot(qubit.args[0],(register0-1,))
+        classical = partial[register0-1]
+        if classical == Qubit('0')[0]:
+            classicalbit = '0'
+            print('The qubit collapses to classical state 0')
+        elif classical == Qubit('1')[0]:
+            classicalbit = '1'
+            print('The qubit collapses to classical state 1')
+    else:
+        if qubit.args[register0-1] == Qubit('0')[0]:
+            classicalbit = '0'
+            print('The qubit collapses to classical state 0')
+        elif qubit.args[register0-1] == Qubit('1')[0]:
+            classicalbit = '1'
+            print('The qubit collapses to classical state 1')
     return classicalbit
 
 #---------Quantum Tic Tac Toe---------------------#
