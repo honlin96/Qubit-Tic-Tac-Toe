@@ -9,7 +9,7 @@ import numpy as np
 import math
 #load_ext sympy.interactive.ipythonprinting
 from IPython.display import display
-from sympy import init_printing,symbols
+from sympy import *
 init_printing(use_latex = True)
 from sympy.physics.quantum import *
 from sympy.physics.quantum.qubit import *
@@ -97,9 +97,9 @@ def ask_move_2nd(register0):
            choice = int(input('Do you want the chosen register to be control or target?(0 for control, 1 for target)'))          
        if choice == 1:
            register1 = register0
-           register0 = int(input('Choose a control qubit:'))
+           register0 = int(input('Choose a control qubit(1-9):'))
        elif choice == 0:
-           register1 = int(input('Choose a target qubit:'))
+           register1 = int(input('Choose a target qubit(1-9):'))
     return playermove,register0,register1
 
 def print_move(i):
@@ -197,14 +197,56 @@ def measurement_result(qubit,register0):
             classicalbit = '1'
             print('The qubit collapses to classical state 1')
     else:
-        if qubit.args[register0-1] == Qubit('0')[0]:
+        if qubit[register0-1] == Qubit('0')[0]:
             classicalbit = '0'
             print('The qubit collapses to classical state 0')
-        elif qubit.args[register0-1] == Qubit('1')[0]:
+        elif qubit[register0-1] == Qubit('1')[0]:
             classicalbit = '1'
             print('The qubit collapses to classical state 1')
     return classicalbit
 
+def qubitmapping(qubit):
+    #evaluate the qubit(2 cases ->pure state/superposition state)
+    displayqubitlist = []
+    displayqubit = 0
+    print('Error checking:' , qubit) #error checking
+    if type(qubit) == Add: #case 1: Superposition
+        for element in qubit.args:
+            index = 0
+            ket = 0
+            for x in status:
+            #we only need to print the state if there is a qubit in the box
+                if int(x) == 1:
+                    if element.args[-1][index-1] == Qubit('0')[0]:
+                        name = 'O'+ str(index)
+                    else:
+                        name = 'X' + str(index)
+                    if ket == 0:
+                        ket = Ket(name)
+                    else:
+                        ket = TensorProduct(ket,Ket(name))
+                index = index + 1
+            displayqubit = displayqubit + ket
+    else:    #case 2 -> pure state
+        #check the status of the board through for loop.
+        counter = 0
+        for element in status:
+            if int(element) == 1:
+                #if there is a qubit in the box, check if it is 0 or 1
+                if qubit[counter-1] ==  Qubit('0')[0] :
+                    name = 'O'+str(counter)
+                    displayqubitlist = displayqubitlist + [Ket(name)]
+                else :
+                    name = 'X'+str(counter)
+                    displayqubitlist = displayqubitlist + [Ket(name)]
+            counter = counter + 1
+        for kets in displayqubitlist:
+            if kets != 0:
+                if displayqubit == 0:
+                    displayqubit = kets
+                else:
+                    displayqubit = TensorProduct(kets,displayqubit)
+    return displayqubit
 #---------Quantum Tic Tac Toe---------------------#
 #First create a 3x3 board. Player 1 will choose a box first, while player 2 will choose another box.
 #Create the following entanglement (|01>+|10>)\sqrt(2) on these 2 boxes. Then, measure 1 of the box
@@ -225,7 +267,7 @@ while winning_cond == False:
     player = Round % 2 + 1
     print("Current board")
     drawBoard(board)
-    print("Current quantum state:",qubit)
+    print("Current quantum state:",qubitmapping(qubit))
 #-----------Choose box----------#
     Round = round_counter(Round)
     print("It's your turn now, player ", player)
@@ -244,7 +286,7 @@ while winning_cond == False:
     if playermove == 5:
         print_move(playermove)
         qubit = updatestate(player,register0,register1,playermove,qubit)
-        print("Current quantum state:",qubit)
+        print("Current quantum state:",qubitmapping(qubit))
         result = measurement_result(qubit,register0)
         marker(result,board,register0)
 #-----------Check winner-----------------#           
@@ -263,7 +305,7 @@ while winning_cond == False:
     while unitaryno == 1:
         qubit = updatestate(player,register0,register1,playermove,qubit)
         print_move(playermove)
-        print("Current quantum state:",qubit)
+        print("Current quantum state:",qubitmapping(qubit))
         playermove,register0,register1 = ask_move_2nd(chosenbox)
         if playermove < 5:
             validmove = isvalidmove(playermove,register0,register1)
@@ -273,7 +315,7 @@ while winning_cond == False:
             update_board(playermove,register0)
             qubit = updatestate(player,register0,register1,playermove,qubit)
             print_move(playermove)
-            print("Current quantum state:",qubit)
+            print("Current quantum state:",qubitmapping(qubit))
         else:
             print('You have ended your turn.')
             print(' ')
