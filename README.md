@@ -10,3 +10,5 @@ V4
 2. Initial Quantum State is |000000000> 
 
 4/9/19 Fixed bug in QTTT V4
+
+6/9/19 Fixed the display for quantum state 
