@@ -13,3 +13,5 @@ V4
 4/9/19 Fixed bug in QTTT V4
 
 6/9/19 Fixed the display for quantum state QTTT V4
+
+11/10/19 Added round constraint for QTTT V4
