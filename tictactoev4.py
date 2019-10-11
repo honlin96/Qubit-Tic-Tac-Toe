@@ -73,9 +73,9 @@ def ask_move(register0):
            choice = int(input('Do you want the chosen register to be control or target?(0 for control, 1 for target)'))          
        if choice == 1:
            register1 = register0
-           register0 = int(input('Choose a control qubit:'))
+           register0 = int(input('Choose a control qubit(1-9):'))
        elif choice == 0:
-           register1 = int(input('Choose a target qubit:'))
+           register1 = int(input('Choose a target qubit(1-9):'))
     return playermove,register0,register1
 
 def ask_move_2nd(register0):
@@ -143,7 +143,10 @@ def isvalidmove(move,register0,register1):
             if status[register0] and status[register1] == 1 and register0 != register1:
                 return True
             else:
-                print('Invalid move: One of the register is empty/has been measured')
+                if status[register0] == 0 or status[register0] == 5:
+                    print('Invalid move:Box ',register0 ,'is empty/has been measured')
+                if status[register1] == 0 or status[register1] == 5:
+                    print('Invalid move:Box ',register1 ,'is empty/has been measured')
                 print(' ')
                 return False
             
@@ -205,6 +208,20 @@ def measurement_result(qubit,register0):
             print('The qubit collapses to classical state 1')
     return classicalbit
 
+def measure_all(qubit,board,status):
+    #measure all qubits
+    qubit = measure_all_oneshot(qubit)
+    #update the board
+    register = 0
+    for i in qubit:
+        #check board's status, if a qubit is prepared, then collapse to the state, else, ignore
+        if i == Qubit('0')[0] and status[9-register] == 1:
+            board[9-register] = 'O'
+        elif i == Qubit('1')[0] and status[9-register] == 1:
+            board[9-register] = 'X'
+        register = register + 1
+    return board
+    
 def qubitmapping(qubit):
     #evaluate the qubit(2 cases ->pure state/superposition state)
     displayqubitlist = []
@@ -263,7 +280,7 @@ winning_cond = False
 Round = 0 #this is a counter to count which round we are in
 
 #------------Pipeline--------------------#
-while winning_cond == False:
+while winning_cond == False : #system will collapse at round 5
     player = Round % 2 + 1
     print("Current board")
     drawBoard(board)
@@ -320,4 +337,15 @@ while winning_cond == False:
             print('You have ended your turn.')
             print(' ')
         unitaryno = unitaryno + 1
-    
+    #break the loop in round 5
+    if int(math.floor(Round/2)) == 5 and player == 2:
+        break
+    #measure all qubit
+board = measure_all(qubit, board,status)
+drawBoard(board)
+#-----------Check winner-----------------#           
+if isWinner(board,letter[0]) == True:
+    print("Congratulation! Player 1 won the game!") 
+elif isWinner(board,letter[1]) == True:
+    print("Congratulation! Player 2 won the game!")
+        
