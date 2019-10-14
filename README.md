@@ -15,7 +15,8 @@ Rules:
 4. The projective operation will collapse the qubit into a classical bit.
 5. The player wins by forming a straight line using 3 classical bit. 
 
-
+# Game Interface
+![GUI](https://user-images.githubusercontent.com/37786219/66732018-ca659d80-ee8c-11e9-96c2-42d7c5c7f2f1.png)
 
 # Log
 13/12/18 Uploaded Quantum Tic Tac Toe V1 
