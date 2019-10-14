@@ -1,5 +1,7 @@
 # Qubit Tic Tac Toe- A quantum game for quantum mechanics and quantum programming education
-Requires sympy package. 
+Runs in python. Requires sympy package. 
+
+Download tictactoegui.py for Guided User Interface. 
 
 # Descripition
 Qubit Tic Tac Toe replaces the classical marking with quantum marking. Each player can perform either 1 measurement, or 2 unitary moves. The first to form a straight line with the player's own classical marking will win the game.
