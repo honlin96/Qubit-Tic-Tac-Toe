@@ -9,11 +9,10 @@ Qubit Tic Tac Toe replaces the classical marking with quantum marking. Each play
 This quantization is different from Goff's quantization, where he quantizes the moves instead of the marking.
 
 Rules: 
-1. Player chooses one of the boxes each turn 
-2. Players choose to make 2 unitary operations OR 1 projective operation on the box.
-3. Unitary operations include: Initiate a qubit, X gate and Hadamard Gate.
-4. The projective operation will collapse the qubit into a classical bit.
-5. The player wins by forming a straight line using 3 classical bit. 
+1. Players choose to make 2 unitary operations OR 1 projective operation on a box.
+2. Unitary operations include: Initiate a qubit, X gate and Hadamard Gate.
+3. The projective operation will collapse the qubit into a classical bit.
+4. The player wins by forming a straight line using 3 classical bit. 
 
 # Game Interface
 ![GUI](https://user-images.githubusercontent.com/37786219/66732018-ca659d80-ee8c-11e9-96c2-42d7c5c7f2f1.png)
