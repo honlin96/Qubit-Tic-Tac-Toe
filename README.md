@@ -2,6 +2,7 @@
 Runs in python. Requires sympy package. 
 
 Download tictactoegui.py for Guided User Interface. 
+
 Download qubittictactoe.ipynb to understand the game and circuit logic(this notebook explains how qiskit is implemented in the game)
 # Description
 Qubit Tic Tac Toe replaces the classical marking with quantum marking. Each player can perform either 1 measurement, or 2 unitary moves. The first to form a straight line with the player's own classical marking will win the game.
