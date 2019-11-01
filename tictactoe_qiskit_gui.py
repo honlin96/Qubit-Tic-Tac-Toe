@@ -24,8 +24,8 @@ circuit = QuantumCircuit(9,9)
 tk = Tk() 
 tk.title("Qubit Tic Tac Toe")
 
-c = StringVar()
-x1 = StringVar()
+c = StringVar() 
+x1 = StringVar() #record down the choice
 
 pa_dict = {'q':'|O>', 'h':'H', 'x':'X', 'cx':'CX', 'm':'M'}
 pb_dict = {'q':'|X>', 'h':'H', 'x':'X', 'cx':'CX', 'm':'M'}
@@ -165,22 +165,12 @@ def measurement_result(outputstate,measured_register,qubitnumber):
     for index,element in enumerate(outputstate):
         if element != 0:
             ket = bin(index)[2:].zfill(qubitnumber)
+            print("The ket is |"+str(ket) +"> with probability amplitude " + str(element))
             result = ket[qubitnumber-measured_register] #the ket is read from right to left(|987654321>)
             break #break the iteration since we have obtained the result
+    print("The qubit collapsed to " + result)
     return result
 
-def measure_all(qubit,status):
-    #measure all qubits
-    qubit = measure_all_oneshot(qubit)
-    #update the board
-    button = [button7, button8,button9, button4, button5, button6, button1, button2, button3]
-    for index,item in enumerate(qubit):
-        #check board's status, if a qubit is prepared, then collapse to the state, else, ignore
-#        qprint(index), print(item)
-        if item == Qubit('0')[0] and status[9-index] == 1:
-            button[8-index]["text"] = '0'
-        elif item == Qubit('1')[0] and status[9-index] == 1:
-            button[8-index]["text"] = '1'
 
 def braket_notation(outputstate,qubitnumber):
     #print out the wavefunction in braket notation.
@@ -198,8 +188,8 @@ def braket_notation(outputstate,qubitnumber):
     return ket
             
 def btnClick(buttons, label, choice, bt_name):
-    global pa_turn, num_move, flag, qubit, status
-        
+    global pa_turn, num_move, flag, status
+    #buttontextarr =[button7['text'],button8['text'],button9['text'],button4['text'],button5['text'],button6['text'],button1['text'],button2['text'],button3['text']]   
     move, reg0, reg1 = ask_move(bt_name, choice)
     isvalid = isvalidmove(move, reg0, reg1, label[3])
     print(" The move is {}".format(isvalid))
@@ -212,37 +202,49 @@ def btnClick(buttons, label, choice, bt_name):
         
     print("Current quantum state:",braket_notation(outputstate,9))
     print(" Status is {}".format(status))
-        
+    
+    winningcond = False #winning condition
     if move == 'm':
         result = measurement_result(outputstate, reg0,9)
         buttons["text"] = str(result)
-        checkForWin()
+        winningcond = checkForWin()
+        flag += 1
     else:
         prefix = choose_dict(pa_turn)[move]
         if move == 'cx': 
             prefix = prefix + str(reg0) + str(reg1) 
-        buttons["text"] = prefix + " " + buttons["text"] 
-                
-    if num_move == 2:
+        buttons["text"]  = prefix + " " + buttons["text"] 
+    
+    drawcond = checkForDraw(winningcond)
+    flag += 1
+    
+    if (flag == 20): #measure all once the flag reaches 20 (10 rounds)
+        print("10th round! Measuring all qubits...")
+        disableButton()
+        buttonarr = [button7,button8,button9,button4,button5,button6,button1,button2,button3]
+        for register,item in enumerate(status):
+            if item == 1: #measure the box is there is a qubit. 
+               circuit.measure(register-1,register-1)
+               job = execute(circuit,simulator)
+               result = job.result()
+               outputstate = result.get_statevector()
+               result = measurement_result(outputstate,register,9)
+               buttonarr[register-1]["text"] = str(result)
+        winningcond = checkForWin()
+        if winningcond != True:
+            tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It is a Tie")
+            
+    if num_move == 2 and winningcond == False and drawcond == False:
         pa_turn = not pa_turn
         num_move = 0
-        tkinter.messagebox.showinfo("Qubit Tic Tac Toe","It's Player {}'s turn!".format(turn_for(pa_turn)))
+        tkinter.messagebox.showinfo("Qubit Tic Tac Toe,Round {} ".format(flag/2),"It's Player {}'s turn!".format(turn_for(pa_turn)))
         label[0]["text"] = "Turn for Player {}:".format(turn_for(pa_turn))
         label[0]["bg"] = color(pa_turn)
-        label[0]["fg"] = color(not(pa_turn))
-    flag += 1
-
-        
-#    if (flag == 50):
-#        disableButton()
-#        measure_all(qubit,status)
-#        checkForWin()
-#        if checkForWin != True:
-#            tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It is a Tie")
-#    #else:
-    #    tkinter.messagebox.showinfo("Tic-Tac-Toe", "Button already Clicked!")
+        label[0]["fg"] = color(not(pa_turn))           
+    
 
 def checkForWin():
+    #return true if the winning condition is satisfied
     if (button1['text'] == '0' and button2['text'] == '0' and button3['text'] == '0' or
         button4['text'] == '0' and button5['text'] == '0' and button6['text'] == '0' or
         button7['text'] == '0' and button8['text'] == '0' and button9['text'] == '0' or
@@ -253,7 +255,8 @@ def checkForWin():
         button7['text'] == '0' and button6['text'] == '0' and button9['text'] == '0'):
         disableButton()
         tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe: Congratulation!", " Player A Wins!")
-
+        return True
+    
     elif (button1['text'] == '1' and button2['text'] == '1' and button3['text'] == '1' or
           button4['text'] == '1' and button5['text'] == '1' and button6['text'] == '1' or
           button7['text'] == '1' and button8['text'] == '1' and button9['text'] == '1' or
@@ -264,7 +267,23 @@ def checkForWin():
           button7['text'] == '1' and button6['text'] == '1' and button9['text'] == '1'):
         disableButton()
         tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe: Congratulation!", "Player B Wins!")
-
+        return True
+    else:
+        return False
+ 
+def checkForDraw(winningcond):
+    draw = 0
+    #check if the game is drawed after measuring all boxes. 
+    for index,element in enumerate(status):
+        if element == 3:
+            draw += 1
+    if draw == 9 and winningcond != True:
+        disableButton()
+        tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It's a draw.")
+        return True
+    else:
+        return False
+    
 buttons = StringVar()
 
 label1 = Label( tk, text= "Turn for Player Alice,|0>:", font='Times 12 bold', bg='white', fg='black', height=1, width=25)
@@ -273,42 +292,43 @@ label1.grid(row=1, columnspan = 2)
 choice = Entry(tk, textvariable=x1, bd=5)
 choice.grid(row=1, column=2)
 
-label2 = Label( tk, text= "Choose 2 unitary moves or 1 measurement \n q, h, x, m,", font='Times 12 bold', bg='gray', fg='black', height=3, width=45)
+label2 = Label( tk, text= "Choose 2 unitary moves or 1 measurement", font='Times 12 bold', bg='yellow', fg='black', height=1, width=45)
 label2.grid(row=2, columnspan = 3)
 
-label3 = Label( tk, text= "q - put a pure state qubit, h - Hadamard gate, \n x - Pauli X gate, m - Measure ", font='Times 10 bold', bg='gray', fg='black', height=2, width=45)
+label3 = Label( tk, text= "q - put a pure state qubit, h - Hadamard gate, \n x - Pauli X gate, m - Measure ", font='Times 12 bold', bg='yellow', fg='black', height=2, width=45)
 label3.grid(row=3, column=0, columnspan = 3) 
 
-label4 = Label( tk, text= " ", font='Times 12 bold', bg='white', fg='black', height=1, width=44)
+label4 = Label( tk, text= " ", font='Times 12 bold', bg='white', fg='black', height=1, width=45)
 label4.grid(row=4, column=0, columnspan = 3)
 
-label = [label1, label2, label3,label4]
+label = [label1, label2, label3, label4]
 
 button1 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button1, label, choice, bt_name=7))
 button1.grid(row=5, column=0)
 
-button2 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button2, label, choice, bt_name=8))
+button2 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button2, label, choice, bt_name=8))
 button2.grid(row=5, column=1)
 
-button3 = Button(tk, text=' ',font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button3, label, choice, bt_name=9))
+button3 = Button(tk, text=" ",font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button3, label, choice, bt_name=9))
 button3.grid(row=5, column=2)
 
-button4 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button4, label, choice, bt_name=4))
+button4 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button4, label, choice, bt_name=4))
 button4.grid(row=6, column=0)
 
-button5 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button5, label, choice, bt_name=5))
+button5 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button5, label, choice, bt_name=5))
 button5.grid(row=6, column=1)
 
-button6 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button6, label, choice, bt_name=6))
+button6 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button6, label, choice, bt_name=6))
 button6.grid(row=6, column=2)
 
-button7 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button7, label, choice, bt_name=1))
+button7 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button7, label, choice, bt_name=1))
 button7.grid(row=7, column=0)
 
-button8 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button8, label, choice, bt_name=2))
+button8 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button8, label, choice, bt_name=2))
 button8.grid(row=7, column=1)
 
-button9 = Button(tk, text=' ', font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button9, label, choice, bt_name=3))
+button9 = Button(tk, text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8, command=lambda: btnClick(button9, label, choice, bt_name=3))
 button9.grid(row=7, column=2)
 
+#set an infinite loop so window stay in view
 tk.mainloop()
