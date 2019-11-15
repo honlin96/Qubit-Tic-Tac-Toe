@@ -45,3 +45,5 @@ V4
 6/9/19 Fixed the display for quantum state QTTT V4
 
 11/10/19 Added round constraint for QTTT V4
+
+15/11/19 Cleaned up the code for Qiskit GUI
