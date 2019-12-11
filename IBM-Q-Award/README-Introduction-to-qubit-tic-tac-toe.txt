@@ -20,4 +20,4 @@ Players can perform measurement Z basis on any qubit.
 The qubit will collapse according to the probability amplitude
 
 ------------ Special Rule---------------
-If the game has not ended after Round 6, all the qubits will collapse to classical bits. 
+If the game has not ended after Round 10, all the qubits will collapse to classical bits. 
