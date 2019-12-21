@@ -1,9 +1,7 @@
 # Qubit Tic Tac Toe- A quantum game for quantum mechanics and quantum programming education
 Runs in python. Requires sympy package or qiskit. 
 
-Download tictactoegui.py for Guided User Interface. 
-
-Download tictactoeqiskit_gui.py if want to run with qiskit
+Download tictactoev5.py for the game.
 
 Download qubit tic tac toe tutorial.ipynb to understand the game and circuit logic(this notebook explains how qiskit is implemented in the game)
 # Description
