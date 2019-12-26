@@ -16,6 +16,7 @@ Rules:
 4. The player wins by forming a straight line using 3 classical bit. 
 
 Brief Introduction: https://medium.com/@toohonlin/develop-quantum-mechanics-intuition-through-quantum-game-qubit-tic-tac-toe-d9814bc927dc
+
 How to demonstrate quantum teleportation in the game: https://www.youtube.com/watch?v=4LyNCqkNVf8&t=616s
 # Game Interface
 ![GUI](https://user-images.githubusercontent.com/37786219/66732018-ca659d80-ee8c-11e9-96c2-42d7c5c7f2f1.png)
