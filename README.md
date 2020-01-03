@@ -50,3 +50,5 @@ V4
 15/11/19 Cleaned up the code for Qiskit GUI
 
 21/12/19 Added CNOT gate into the game. 
+
+4/1/20 Cleaned the codes and fix some bugs
