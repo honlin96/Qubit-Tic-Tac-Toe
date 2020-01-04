@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Dec 21 02:37:13 2019
-
-@author: honlin
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sun Nov 10 20:06:07 2019
 
 @author: honlin
@@ -33,7 +26,7 @@ def measurement_result(outputstate,measured_register,qubitnumber):
         if element != 0:
             ket = bin(index)[2:].zfill(qubitnumber)
             print("The ket is |"+str(ket) +"> with probability amplitude " + str(element))
-            result = ket[qubitnumber-measured_register] #the ket is read from right to left(|987654321>)
+            result = ket[qubitnumber-measured_register-1] #the ket is read from right to left(|987654321>)
             break #break the iteration since we have obtained the result
     print("The qubit collapsed to " + result)
     return result
@@ -129,7 +122,7 @@ class MainApp:                         ### (1)
                 prefix = self.choose_dict()[move]
             else:
                 SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-                prefix = 'CX' + str(reg0) + str(reg1) 
+                prefix = 'CX' + str(reg0+1) + str(reg1) 
                 prefix = prefix.translate(SUB)
                 targetbutton = self.buttons[reg1-1]
                 targetbutton['text'] = prefix + " " + targetbutton['text']
@@ -237,19 +230,19 @@ class MainApp:                         ### (1)
             #if both registers has a qubit, and the registers do not repeat itself
                 labelreg0 = move[2]
             #return false if the clicked control qubit is not the same as the entered control qubit
-                if int(labelreg0) != reg0:
-                    print(labelreg0, reg0)
+                if int(labelreg0) != reg0+1:
+                    print(labelreg0, reg0+1)
                     self.label4['text'] = 'Invalid move: Wrong Control Qubit'
                     return False
                 if self.status[reg0] != 1:
                     self.label4['text'] = 'Invalid move: The control register is empty/has been measured'
                     return False
                 reg1 = int(move[3])
-                if reg0 == reg1:
+                if reg0+1 == reg1:
                     self.label4['text'] = 'Invalid move: The control and target register cannot be the same'
                     return False
             
-                if self.status[reg1] == 1:
+                if self.status[reg1-1] == 1:
                     self.label4['text'] = ""
                     self.num_move += 1
                     return True
@@ -264,6 +257,7 @@ class MainApp:                         ### (1)
         #register0 = control qubit, register1 = target qubit
         #update and print circuit
         reg1 = self.reg1
+        print(reg1)
         move = self.chosenmove.get()
         if move == 'q':
             if self.pa_turn == False:
