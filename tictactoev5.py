@@ -48,8 +48,8 @@ def braket_notation(outputstate,qubitnumber):
     return ket
 #Create a blank window
 
-class MainApp:                         ### (1)
-    def __init__(self, Parent):      ### (1a)
+class MainApp:
+    def __init__(self, Parent):      
         self.myContainer1 = Frame(Parent)
         #variables
         self.num_move = 0
@@ -82,10 +82,11 @@ class MainApp:                         ### (1)
     #create 3x3 boxes
         self.buttons = []
         for i in range(9):
-            self.buttons.append(Button(text=" ", font='Times 20 bold', bg='gray', fg='white', height=4, width=8,command=lambda i=i :self.btnClick(i)))
+            self.buttons.append(Button(text=" ", wraplength = 150, font='Times 20 bold', bg='gray', fg='white', height=4, width=8,command=lambda i=i :self.btnClick(i)))
             #Note: command lambda i=i to ensure the value i is stored and passed into the function when the button is created
             self.buttons[i].grid(row= 5 + math.floor(i/3), column=i%3)
-    
+            Grid.rowconfigure(root, i%3, weight = 1)
+            Grid.columnconfigure(root, 5 + math.floor(i/3), weight = 1)
     #functions    
     def btnClick(self,reg0):
         isvalid = self.isvalidmove(reg0)
@@ -142,9 +143,15 @@ class MainApp:                         ### (1)
                    result = job.result()
                    outputstate = result.get_statevector()
                    result = measurement_result(outputstate,register,9)
-                   self.buttons[register]["text"] = str(result)
+                   if str(result) == '0':
+                       self.buttons[register]["bg"] = 'light slate blue'
+                       self.buttons[register]["text"] = 'O'
+                   else:
+                       self.buttons[register]["bg"] = 'forest green'
+                       self.buttons[register]["text"] = 'X'
             winningcond = self.checkForWin()
             if winningcond != True:
+                drawcond = True
                 tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It is a Tie")
                 
         if self.num_move == 2 and winningcond == False and drawcond == False:
