@@ -52,3 +52,5 @@ V4
 21/12/19 Added CNOT gate into the game. 
 
 4/1/20 Cleaned the codes and fix some bugs
+
+11/1/20 Added wraplength(automatically wrap the text if it is too long)
