@@ -73,7 +73,7 @@ class MainApp:
         self.label2 = Label(text= "Choose 2 unitary moves or 1 measurement", font='Times 12 bold', bg='light salmon', fg='black', height=1, width=45)
         self.label2.grid(row=2, columnspan = 3)
         
-        self.label3 = Label(text= "q - put a pure state qubit, h - Hadamard gate, \n x - Pauli X gate, m - Measure ", font='Times 12 bold', bg='light salmon', fg='black', height=2, width=45)
+        self.label3 = Label(text= "q - put a pure state qubit, h - Hadamard gate, \n x - Pauli X gate, m - Measure, s - Skip", font='Times 12 bold', bg='light salmon', fg='black', height=2, width=45)
         self.label3.grid(row=3, column=0, columnspan = 3) 
             
         self.label4 = Label(text= " ", font='Times 12 bold', bg='white', fg='black', height=1, width=45)
@@ -100,13 +100,14 @@ class MainApp:
         #print(" Num of move is {}".format(self.num_move))
         if not isvalid:
             return
-        outputstate = self.updatestate(reg0)
+        outputstate = self.updatestate(reg0) #execute the move
         self.update_status(reg0)
             
         print("Current quantum state:",braket_notation(outputstate,9))
         print(" Status is {}".format(self.status))
         button = self.buttons[reg0]
-        winningcond = self.winningcond #winning condition
+        winningcond = self.winningcond 
+        #update the buttons and board's condition
         if move == 'm':
             result = measurement_result(outputstate, reg0,9)
             #change the color of the box once it is measured
@@ -117,23 +118,46 @@ class MainApp:
                 button["bg"] = 'forest green'
                 button["text"] = 'X'
             winningcond = self.checkForWin()
-            self.flag += 1
+            self.flag += 2
         else:
-            if move[:2] != 'cx':
-                prefix = self.choose_dict()[move]
-            else:
+            if move[:2] == 'cx':
                 SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
                 prefix = 'CX' + str(reg0+1) + str(reg1) 
                 prefix = prefix.translate(SUB)
                 targetbutton = self.buttons[reg1-1]
                 targetbutton['text'] = prefix + " " + targetbutton['text']
-            button["text"]  = prefix + " " + button["text"] 
-            
+                button["text"]  = prefix + " " + button["text"]
+                self.flag += 1
+            elif move != 's':
+                prefix = self.choose_dict()[move]
+                button["text"]  = prefix + " " + button["text"]
+                self.flag += 1
+            elif move == 's':
+                if self.num_move == 2:
+                    self.flag += 2
+                else:
+                    self.flag += 1
+        print("number_move {}".format(self.num_move))
+        print("Flag number {}".format(self.flag))
+         
         if winningcond == False:
             drawcond = self.checkForDraw()
-        self.flag += 1
         
-        if (self.flag == 20): #measure all once the flag reaches 20 (10 rounds)
+        self.collapseall(outputstate,20)
+        self.nextround(winningcond,drawcond)           
+        
+    def nextround(self, winningcond, drawcond):
+        #change to next player's turn if the condition is satisfied
+        if self.num_move >= 2 and winningcond == False and drawcond == False:
+            self.pa_turn = not self.pa_turn
+            self.num_move = 0
+            tkinter.messagebox.showinfo("Qubit Tic Tac Toe,Round {} ".format(self.flag/2),"It's Player {}'s turn!".format(self.turn_for()))
+            self.label1["text"] = "Turn for Player {}:".format(self.turn_for())
+            self.label1["bg"] = self.labelcolor()   
+            
+    def collapseall(self,outputstate,flagnum):
+        #measure all qubits once the flag reaches 20 (10 rounds)
+        if (self.flag == flagnum): 
             print("10th round! Measuring all qubits...")
             self.disableButton()
             for register,item in enumerate(self.status):
@@ -152,20 +176,13 @@ class MainApp:
             winningcond = self.checkForWin()
             if winningcond != True:
                 drawcond = True
-                tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It is a Tie")
-                
-        if self.num_move == 2 and winningcond == False and drawcond == False:
-            self.pa_turn = not self.pa_turn
-            self.num_move = 0
-            tkinter.messagebox.showinfo("Qubit Tic Tac Toe,Round {} ".format(self.flag/2),"It's Player {}'s turn!".format(self.turn_for()))
-            self.label1["text"] = "Turn for Player {}:".format(self.turn_for())
-            self.label1["bg"] = self.color()   
-            
+                tkinter.messagebox.showinfo("Qubit Tic-Tac-Toe", "It is a Tie")   
+        
     def disableButton(self):
         for button in self.buttons:
             button.configure(state = DISABLED)
             
-    def color(self):
+    def labelcolor(self):
     #Change the background and foreground colour for different players
         if self.pa_turn:
             return 'light blue' 
@@ -196,7 +213,7 @@ class MainApp:
             self.status[reg0] = 3
         
     def isvalidmove(self,reg0):
-        #return false if the move is not valid, and print out the error message
+        #update num_move if the move is valid, return false if the move is not valid, and print out the error message
         move = self.chosenmove.get()
         if len(move) == 1:
             if move == 'q':
@@ -218,6 +235,10 @@ class MainApp:
                     self.label4['text'] = 'Invalid move: The register is empty/has been measured'
                     return False
                 
+            elif move == 's':
+                self.num_move += 2
+                return True
+            
             elif move == 'm':
                 if self.status[reg0] == 1:
                     self.label4['text'] = ""
