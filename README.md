@@ -53,4 +53,4 @@ V4
 
 4/1/20 Cleaned the codes and fix some bugs
 
-11/1/20 Added wraplength(automatically wrap the text if it is too long)
+11/1/20 Added wraplength(automatically wrap the text if it is too long), Allow players to skip their turn
