@@ -22,7 +22,7 @@ global circuit
 circuit = QuantumCircuit(9,9)
 #logic function
 def measurement_result(outputstate,measured_register,qubitnumber):
-    for index,element in enumerate(outputstate):
+    for index,element in enumerate(np.asarray(outputstate)):
         if element != 0:
             ket = bin(index)[2:].zfill(qubitnumber)
             print("The ket is |"+str(ket) +"> with probability amplitude " + str(element))
@@ -36,7 +36,7 @@ def braket_notation(outputstate,qubitnumber):
     #print out the wavefunction in braket notation.
     #binary reads from right to left
     ket = ''
-    for index,element in enumerate(outputstate):
+    for index,element in enumerate(np.asarray(outputstate)):
         if element != 0:
             if ket == '':
             #only print out states with non-zero probability amplitude
@@ -49,8 +49,12 @@ def braket_notation(outputstate,qubitnumber):
 #Create a blank window
 
 class MainApp:
-    def __init__(self, Parent):      
+    def __init__(self, Parent):
+        self.Parent = Parent
         self.myContainer1 = Frame(Parent)
+        # self.clean()
+
+    # def clean(self):
         #variables
         self.num_move = 0
         self.chosenmove = StringVar() #keep the string variable from the entry
@@ -79,7 +83,7 @@ class MainApp:
         self.label4 = Label(text= " ", font='Times 12 bold', bg='white', fg='black', height=1, width=45)
         self.label4.grid(row=4, column=0, columnspan = 3)
         
-    #create 3x3 boxes
+        #create 3x3 boxes
         self.buttons = []
         for i in range(9):
             self.buttons.append(Button(text=" ", wraplength = 150, font='Times 20 bold', bg='gray', fg='white', height=4, width=8,command=lambda i=i :self.btnClick(i)))
@@ -87,7 +91,8 @@ class MainApp:
             self.buttons[i].grid(row= 5 + math.floor(i/3), column=i%3)
             Grid.rowconfigure(root, i%3, weight = 1)
             Grid.columnconfigure(root, 5 + math.floor(i/3), weight = 1)
-    #functions    
+
+    #functions
     def btnClick(self,reg0):
         isvalid = self.isvalidmove(reg0)
         move = self.chosenmove.get()
@@ -139,13 +144,14 @@ class MainApp:
                     self.flag += 1
         print("number_move {}".format(self.num_move))
         print("Flag number {}".format(self.flag))
-         
+
+        drawcond = False
         if winningcond == False:
             drawcond = self.checkForDraw()
-        
+
         self.collapseall(outputstate,20)
-        self.nextround(winningcond,drawcond)           
-        
+        self.nextround(winningcond,drawcond)
+
     def nextround(self, winningcond, drawcond):
         #change to next player's turn if the condition is satisfied
         if self.num_move >= 2 and winningcond == False and drawcond == False:
@@ -153,8 +159,8 @@ class MainApp:
             self.num_move = 0
             tkinter.messagebox.showinfo("Qubit Tic Tac Toe,Round {} ".format(self.flag/2),"It's Player {}'s turn!".format(self.turn_for()))
             self.label1["text"] = "Turn for Player {}:".format(self.turn_for())
-            self.label1["bg"] = self.labelcolor()   
-            
+            self.label1["bg"] = self.labelcolor()
+
     def collapseall(self,outputstate,flagnum):
         #measure all qubits once the flag reaches 20 (10 rounds)
         if (self.flag == flagnum): 
@@ -290,9 +296,9 @@ class MainApp:
         if move == 'q':
             if self.pa_turn == False:
                 circuit.x(reg0)
-                circuit.iden(reg0)
+                circuit.id(reg0)
             else:
-                circuit.iden(reg0) 
+                circuit.id(reg0) 
         elif move == 'h':
             circuit.h(reg0)
         elif move == 'x':
